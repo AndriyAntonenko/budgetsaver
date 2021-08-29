@@ -4,19 +4,19 @@ import (
 	"strings"
 )
 
-type Trie struct {
+type RouterTrie struct {
 	Root     *RouterTrieNode
 	hashSize int
 }
 
-func NewTrie(headValue string, hashSize int) *Trie {
-	return &Trie{
+func NewTrie(headValue string, hashSize int) *RouterTrie {
+	return &RouterTrie{
 		Root:     NewRouterTrieNode(headValue, hashSize),
 		hashSize: hashSize,
 	}
 }
 
-func (t *Trie) AddNode(path string) {
+func (t *RouterTrie) AddNode(path string) {
 	parts := strings.Split(path, "/")
 	currentNode := t.Root
 
@@ -36,7 +36,7 @@ func (t *Trie) AddNode(path string) {
 	currentNode.IsMethod = true
 }
 
-func (t *Trie) Lookup(path string) bool {
+func (t *RouterTrie) Lookup(path string) bool {
 	parts := strings.Split(path, "/")
 	currentNode := t.Root
 
