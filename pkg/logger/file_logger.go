@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -11,6 +12,7 @@ var once sync.Once
 
 type FileLogger struct {
 	AppName string
+	Debug   bool
 	logger  *log.Logger
 	logFile *os.File
 }
@@ -22,7 +24,7 @@ func UseBasicLogger() *FileLogger {
 	return fileLogger
 }
 
-func InitFileLogger(appName string, filename string) *FileLogger {
+func InitFileLogger(appName string, filename string, debug bool) *FileLogger {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatalf("Error during initialization of logfile %s", err.Error())
@@ -36,6 +38,7 @@ func InitFileLogger(appName string, filename string) *FileLogger {
 			AppName: appName,
 			logger:  logger,
 			logFile: f,
+			Debug:   debug,
 		}
 	})
 
@@ -47,13 +50,28 @@ func (l *FileLogger) Shutdown() {
 }
 
 func (l *FileLogger) Info(message string, ctx LogContext) {
-	l.logger.Printf("[INFO] %s; CONTEXT: %v\n", message, ctx)
+	logMessage := fmt.Sprintf("[INFO] %s; CONTEXT: %v", message, ctx)
+	l.logger.Println(logMessage)
+
+	if l.Debug {
+		fmt.Fprintln(os.Stdout, logMessage)
+	}
 }
 
 func (l *FileLogger) Error(message string, err error, ctx LogContext) {
-	l.logger.Printf("[ERROR]: %s; GO_MESSAGE: %s; CONTEXT: %v\n", message, err.Error(), ctx)
+	logMessage := fmt.Sprintf("[ERROR]: %s; GO_MESSAGE: %s; CONTEXT: %v", message, err.Error(), ctx)
+	l.logger.Println(logMessage)
+
+	if l.Debug {
+		fmt.Fprintln(os.Stderr, logMessage)
+	}
 }
 
 func (l *FileLogger) Warning(message string, ctx LogContext) {
-	l.logger.Printf("[WARNING] %s; CONTEXT: %v\n", message, ctx)
+	logMessage := fmt.Sprintf("[WARNING] %s; CONTEXT: %v", message, ctx)
+	l.logger.Println(logMessage)
+
+	if l.Debug {
+		fmt.Fprintln(os.Stdout, logMessage)
+	}
 }

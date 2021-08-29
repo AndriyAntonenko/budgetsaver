@@ -10,9 +10,8 @@ import (
 	"syscall"
 
 	budgetsaver "github.com/AndriyAntonenko/budgetSaver"
+	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
-
-	"github.com/spf13/viper"
 )
 
 type BasicHandler struct{}
@@ -22,21 +21,20 @@ func (h *BasicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	// TODO: Implement my own logger
-	if err := initConfig(); err != nil {
+	cnf, err := config.InitAppConfig()
+	if err != nil {
 		log.Fatalf("error during config initialization: %s", err.Error())
 	}
 
 	srv := new(budgetsaver.Server)
 
 	go func() {
-		if err := srv.Run(viper.GetString("port"), &BasicHandler{}); err != nil {
+		if err := srv.Run(cnf.Port, &BasicHandler{}); err != nil {
 			log.Fatalf("error during server running: %s", err.Error())
 		}
 	}()
 
-	fileLogger := logger.InitFileLogger("Budget Saver", viper.GetString("logFile"))
+	fileLogger := logger.InitFileLogger("Budget Saver", cnf.LogFile, cnf.Mode == "local")
 	fileLogger.Info("Server successfully started", "func main()")
 
 	quit := make(chan os.Signal)
@@ -51,10 +49,4 @@ func main() {
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Fatalf("error occured on server shutting down: %s", err.Error())
 	}
-}
-
-func initConfig() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }
