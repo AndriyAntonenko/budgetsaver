@@ -1,2 +1,6 @@
 bin/
 .env.example
+
+
+# Logs
+server.log

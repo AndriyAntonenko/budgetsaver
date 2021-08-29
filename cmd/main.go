@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	budgetsaver "github.com/AndriyAntonenko/budgetSaver"
+	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
 
 	"github.com/spf13/viper"
 )
@@ -35,7 +36,8 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Server successfully started")
+	fileLogger := logger.InitFileLogger("Budget Saver", viper.GetString("logFile"))
+	fileLogger.Info("Server successfully started", "func main()")
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
@@ -43,7 +45,8 @@ func main() {
 	// block main goroutine
 	<-quit
 
-	fmt.Println("Server shutting down")
+	fileLogger.Info("Server shutting down", "func main()")
+	fileLogger.Shutdown()
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Fatalf("error occured on server shutting down: %s", err.Error())
