@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -37,7 +36,7 @@ func (t *RouterTrie) AddNode(path string, handler Handler) {
 	currentNode.Handler = &handler
 }
 
-func (t *RouterTrie) Lookup(path string) (Handler, error) {
+func (t *RouterTrie) Lookup(path string) Handler {
 	parts := strings.Split(path, "/")
 	currentNode := t.Root
 
@@ -48,15 +47,15 @@ func (t *RouterTrie) Lookup(path string) (Handler, error) {
 
 		child := currentNode.Children.Lookup(part)
 		if child == nil {
-			return nil, errors.New("Handler not found")
+			return nil
 		}
 
 		currentNode = child
 	}
 
 	if currentNode.Handler == nil {
-		return nil, errors.New("Handler not found")
+		return nil
 	}
 
-	return *currentNode.Handler, nil
+	return *currentNode.Handler
 }
