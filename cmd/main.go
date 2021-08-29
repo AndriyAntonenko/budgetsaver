@@ -12,12 +12,22 @@ import (
 	budgetsaver "github.com/AndriyAntonenko/budgetSaver"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
+	"github.com/AndriyAntonenko/budgetSaver/pkg/router"
 )
 
-type BasicHandler struct{}
+func initRouter() *router.Router {
+	// Testing router
+	r := router.NewRouter()
 
-func (h *BasicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Serving: %s\n", r.URL.Path)
+	r.Post("/api", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Method : %s Serving: %s\n", "POST", r.URL.Path)
+	})
+
+	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Working!!!")
+	})
+
+	return r
 }
 
 func main() {
@@ -29,7 +39,7 @@ func main() {
 	srv := new(budgetsaver.Server)
 
 	go func() {
-		if err := srv.Run(cnf.Port, &BasicHandler{}); err != nil {
+		if err := srv.Run(cnf.Port, initRouter()); err != nil {
 			log.Fatalf("error during server running: %s", err.Error())
 		}
 	}()

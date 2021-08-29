@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -9,14 +10,14 @@ type RouterTrie struct {
 	hashSize int
 }
 
-func NewTrie(headValue string, hashSize int) *RouterTrie {
+func NewRouterTrie(headValue string, hashSize int) *RouterTrie {
 	return &RouterTrie{
 		Root:     NewRouterTrieNode(headValue, hashSize),
 		hashSize: hashSize,
 	}
 }
 
-func (t *RouterTrie) AddNode(path string) {
+func (t *RouterTrie) AddNode(path string, handler Handler) {
 	parts := strings.Split(path, "/")
 	currentNode := t.Root
 
@@ -33,10 +34,10 @@ func (t *RouterTrie) AddNode(path string) {
 		currentNode = child
 	}
 
-	currentNode.IsMethod = true
+	currentNode.Handler = &handler
 }
 
-func (t *RouterTrie) Lookup(path string) bool {
+func (t *RouterTrie) Lookup(path string) (Handler, error) {
 	parts := strings.Split(path, "/")
 	currentNode := t.Root
 
@@ -47,11 +48,15 @@ func (t *RouterTrie) Lookup(path string) bool {
 
 		child := currentNode.Children.Lookup(part)
 		if child == nil {
-			return false
+			return nil, errors.New("Handler not found")
 		}
 
 		currentNode = child
 	}
 
-	return currentNode.IsMethod
+	if currentNode.Handler == nil {
+		return nil, errors.New("Handler not found")
+	}
+
+	return *currentNode.Handler, nil
 }

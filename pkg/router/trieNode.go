@@ -3,7 +3,7 @@ package router
 type RouterTrieNode struct {
 	Value    string
 	Children *RouterHashTable
-	IsMethod bool
+	Handler  *Handler
 }
 
 func NewRouterTrieNode(value string, hashSize int) *RouterTrieNode {
