@@ -1,18 +1,29 @@
 package router
 
+type trieNodeType = int8
+
+const (
+	static trieNodeType = iota
+	root
+	pattern
+)
+
 type RouterTrieNode struct {
-	Value    string
-	Children *RouterHashTable
-	Handler  *Handler
+	path         string
+	children     *RouterHashTable
+	nodeType     trieNodeType
+	patternChild bool
+	handler      *Handler
 }
 
-func NewRouterTrieNode(value string, hashSize int) *RouterTrieNode {
+func NewRouterTrieNode(path string, hashSize int, nodeType trieNodeType, patternChild bool) *RouterTrieNode {
 	return &RouterTrieNode{
-		Value:    value,
-		Children: NewRouterHashTable(hashSize),
+		path:     path,
+		nodeType: nodeType,
+		children: NewRouterHashTable(hashSize),
 	}
 }
 
-func (tn *RouterTrieNode) AddChild(node *RouterTrieNode) {
-	tn.Children.Insert(node)
+func (tn *RouterTrieNode) addChild(node *RouterTrieNode) {
+	tn.children.insert(node)
 }

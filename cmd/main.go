@@ -19,12 +19,16 @@ func initRouter() *router.Router {
 	// Testing router
 	r := router.NewRouter()
 
-	r.Post("/api", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Method : %s Serving: %s\n", "POST", r.URL.Path)
+	r.Get("/api/:testParam/testStatic", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Test Get!!!")
 	})
 
-	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Working!!!")
+	r.Get("/api/testStatic/:testParam", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Test Get 2!!!")
+	})
+
+	r.Get("/api/testStatic/1/:id/:token/sadasd/:pp", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hard test")
 	})
 
 	return r
@@ -38,8 +42,9 @@ func main() {
 
 	srv := new(budgetsaver.Server)
 
+	r := initRouter()
 	go func() {
-		if err := srv.Run(cnf.Port, initRouter()); err != nil {
+		if err := srv.Run(cnf.Port, r); err != nil {
 			log.Fatalf("error during server running: %s", err.Error())
 		}
 	}()

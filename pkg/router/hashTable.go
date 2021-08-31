@@ -1,19 +1,26 @@
 package router
 
 type RouterHashNode struct {
-	Value *RouterTrieNode
-	Next  *RouterHashNode
+	value *RouterTrieNode
+	next  *RouterHashNode
 }
 
 type RouterHashTable struct {
-	Table map[int]*RouterHashNode
-	Size  int
+	table map[int]*RouterHashNode
+	size  int
 }
 
+// Special index for patterns
+const patterIndex = -1
+
 func NewRouterHashTable(hashSize int) *RouterHashTable {
+	if hashSize <= 0 {
+		panic("hashSize should be positive")
+	}
+
 	return &RouterHashTable{
-		Size:  hashSize,
-		Table: map[int]*RouterHashNode{},
+		size:  hashSize,
+		table: map[int]*RouterHashNode{},
 	}
 }
 
@@ -23,25 +30,52 @@ func (hash *RouterHashTable) hashFunction(value string) int {
 		hashKey = hashKey + charCode
 	}
 
-	return hashKey & hash.Size
+	return hashKey % hash.size
 }
 
-func (hash *RouterHashTable) Insert(trieNode *RouterTrieNode) int {
-	index := hash.hashFunction(trieNode.Value)
-	element := RouterHashNode{Value: trieNode, Next: hash.Table[index]}
-	hash.Table[index] = &element
+func (hash *RouterHashTable) insert(trieNode *RouterTrieNode) int {
+	if trieNode.nodeType == pattern {
+		element := RouterHashNode{value: trieNode, next: hash.table[patterIndex]}
+		hash.table[patterIndex] = &element
+		return patterIndex
+	}
+	index := hash.hashFunction(trieNode.path)
+	element := RouterHashNode{value: trieNode, next: hash.table[index]}
+	hash.table[index] = &element
 	return index
 }
 
-func (hash *RouterHashTable) Lookup(value string) *RouterTrieNode {
-	index := hash.hashFunction(value)
-	if hash.Table[index] != nil {
-		t := hash.Table[index]
+func (hash *RouterHashTable) lookupAll(path string) *RouterTrieNode {
+	if node := hash.lookupStatic(path); node != nil {
+		return node
+	}
+
+	// Search for pattern
+	if node := hash.lookupPattern(); node != nil {
+		// TODO: Implement correct pattern search
+		return node
+	}
+
+	return nil
+}
+
+func (hash *RouterHashTable) lookupPattern() *RouterTrieNode {
+	if t := hash.table[patterIndex]; t != nil {
+		// TODO: Implement correct pattern search
+		return t.value
+	}
+
+	return nil
+}
+
+func (hash *RouterHashTable) lookupStatic(path string) *RouterTrieNode {
+	index := hash.hashFunction(path)
+	if t := hash.table[index]; t != nil {
 		for t != nil {
-			if t.Value.Value == value {
-				return t.Value
+			if t.value.path == path {
+				return t.value
 			}
-			t = t.Next
+			t = t.next
 		}
 	}
 
