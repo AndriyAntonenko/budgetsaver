@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type Handler = func(w http.ResponseWriter, r *http.Request)
+type Handler = func(w http.ResponseWriter, r *http.Request, params *RouterParams)
 
 type Router struct {
 	MethodToHandlers map[string]*RouterTrie
@@ -39,14 +39,15 @@ func (r *Router) Delete(path string, handler Handler) *Router {
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trie := router.getMethodTrie(r.Method)
-	node := trie.Lookup(r.URL.Path)
+	ps := NewRouterParams()
+	node := trie.Lookup(r.URL.Path, ps)
 
 	if node == nil || node.handler == nil {
 		router.defaultHandler(w, r)
 		return
 	}
 
-	node.handleCall(w, r)
+	node.handleCall(w, r, ps)
 }
 
 func (router *Router) defaultHandler(w http.ResponseWriter, r *http.Request) {

@@ -77,7 +77,7 @@ func (t *RouterTrie) AddNode(path string, handler Handler) {
 }
 
 // TODO: FIX THIS METHOD!!!
-func (t *RouterTrie) Lookup(path string) *RouterTrieNode {
+func (t *RouterTrie) Lookup(path string, ps *RouterParams) *RouterTrieNode {
 	if path == "/" || path == "" {
 		return t.root
 	}
@@ -101,8 +101,9 @@ func (t *RouterTrie) Lookup(path string) *RouterTrieNode {
 
 			if child.subTries != nil {
 				for _, trie := range child.subTries {
-					subTrieChild := trie.Lookup(strings.Join(parts[index+1:], "/"))
+					subTrieChild := trie.Lookup(strings.Join(parts[index+1:], "/"), ps)
 					if subTrieChild != nil {
+						ps.addParam(trie.paramName, part)
 						return subTrieChild
 					}
 				}

@@ -50,9 +50,9 @@ func (tn *RouterTrieNode) addChild(node *RouterTrieNode) {
 	tn.children.insert(node)
 }
 
-func (tn *RouterTrieNode) handleCall(w http.ResponseWriter, r *http.Request) {
+func (tn *RouterTrieNode) handleCall(w http.ResponseWriter, r *http.Request, ps *RouterParams) {
 	if tn.handler != nil {
 		handler := *tn.handler
-		handler(w, r)
+		handler(w, r, ps)
 	}
 }

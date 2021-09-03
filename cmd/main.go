@@ -19,28 +19,11 @@ func initRouter() *router.Router {
 	// Testing router
 	r := router.NewRouter()
 
-	r.Get("/api/:testParam/testStatic", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Test Get!!!")
-	})
-
-	r.Get("/api/testStatic/:testParam", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Test Get 2!!!")
-	})
-
-	r.Get("/api/testStatic/1/:id/:token/sadasd/:pp", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/api/users/v1/:id/:token/check/:hash", func(w http.ResponseWriter, r *http.Request, ps *router.RouterParams) {
 		fmt.Fprintf(w, "Hard test")
-	})
-
-	r.Get("/api/users/:id/test1", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "/api/users/:id/test1")
-	})
-
-	r.Get("/api/users/:token/test2", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "/api/users/:token/test2")
-	})
-
-	r.Get("/api/users/:token/:id/test3", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "/api/users/:token/:id/test3")
+		fmt.Println(ps.GetString("token"))
+		fmt.Println(ps.ParseInt("id"))
+		fmt.Println(ps.GetString("hash"))
 	})
 
 	return r
