@@ -12,14 +12,14 @@ import (
 	budgetsaver "github.com/AndriyAntonenko/budgetSaver"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
-	"github.com/AndriyAntonenko/budgetSaver/pkg/router"
+	"github.com/AndriyAntonenko/goRouter"
 )
 
-func initRouter() *router.Router {
+func initRouter() *goRouter.Router {
 	// Testing router
-	r := router.NewRouter()
+	r := goRouter.NewRouter()
 
-	r.Get("/api/users/v1/:id/:token/check/:hash", func(w http.ResponseWriter, r *http.Request, ps *router.RouterParams) {
+	r.Get("/api/users/v1/:id/:token/check/:hash", func(w http.ResponseWriter, r *http.Request, ps *goRouter.RouterParams) {
 		fmt.Fprintf(w, "Hard test")
 		fmt.Println(ps.GetString("token"))
 		fmt.Println(ps.ParseInt("id"))
