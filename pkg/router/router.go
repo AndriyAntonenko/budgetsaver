@@ -39,14 +39,14 @@ func (r *Router) Delete(path string, handler Handler) *Router {
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trie := router.getMethodTrie(r.Method)
-	handler := trie.Lookup(r.URL.Path)
+	node := trie.Lookup(r.URL.Path)
 
-	if handler == nil {
+	if node == nil || node.handler == nil {
 		router.defaultHandler(w, r)
 		return
 	}
 
-	handler(w, r)
+	node.handleCall(w, r)
 }
 
 func (router *Router) defaultHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +57,7 @@ func (router *Router) defaultHandler(w http.ResponseWriter, r *http.Request) {
 func (r *Router) getMethodTrie(method string) *RouterTrie {
 	trie, ok := r.MethodToHandlers[method]
 	if !ok {
-		trie = NewRouterTrie("/", 10)
+		trie = NewRouterTrie("*", 10, "")
 		r.MethodToHandlers[method] = trie
 	}
 

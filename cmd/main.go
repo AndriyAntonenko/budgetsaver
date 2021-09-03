@@ -31,6 +31,18 @@ func initRouter() *router.Router {
 		fmt.Fprintf(w, "Hard test")
 	})
 
+	r.Get("/api/users/:id/test1", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "/api/users/:id/test1")
+	})
+
+	r.Get("/api/users/:token/test2", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "/api/users/:token/test2")
+	})
+
+	r.Get("/api/users/:token/:id/test3", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "/api/users/:token/:id/test3")
+	})
+
 	return r
 }
 

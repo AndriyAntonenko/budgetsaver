@@ -1,5 +1,9 @@
 package router
 
+import (
+	"net/http"
+)
+
 type trieNodeType = int8
 
 const (
@@ -9,21 +13,46 @@ const (
 )
 
 type RouterTrieNode struct {
-	path         string
-	children     *RouterHashTable
-	nodeType     trieNodeType
-	patternChild bool
-	handler      *Handler
+	path     string
+	children *RouterHashTable
+	nodeType trieNodeType
+	handler  *Handler
+
+	subTries []*RouterTrie
 }
 
-func NewRouterTrieNode(path string, hashSize int, nodeType trieNodeType, patternChild bool) *RouterTrieNode {
+func NewRouterRootTrieNode(hashSize int) *RouterTrieNode {
+	return &RouterTrieNode{
+		children: NewRouterHashTable(hashSize),
+		nodeType: root,
+	}
+}
+
+func NewRouterStaticTrieNode(path string, hashSize int) *RouterTrieNode {
 	return &RouterTrieNode{
 		path:     path,
-		nodeType: nodeType,
+		nodeType: static,
 		children: NewRouterHashTable(hashSize),
+	}
+}
+
+func NewRouterParamTrieNode(paramName string, hashSize int) *RouterTrieNode {
+	subTries := make([]*RouterTrie, 0)
+	subTries = append(subTries, NewRouterTrie("*", hashSize, paramName))
+
+	return &RouterTrieNode{
+		nodeType: pattern,
+		subTries: subTries,
 	}
 }
 
 func (tn *RouterTrieNode) addChild(node *RouterTrieNode) {
 	tn.children.insert(node)
+}
+
+func (tn *RouterTrieNode) handleCall(w http.ResponseWriter, r *http.Request) {
+	if tn.handler != nil {
+		handler := *tn.handler
+		handler(w, r)
+	}
 }

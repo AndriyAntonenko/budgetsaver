@@ -1,35 +1,41 @@
 package router
 
 import (
-	"fmt"
 	"strings"
 )
 
 type RouterTrie struct {
-	root     *RouterTrieNode
-	hashSize int
+	paramName string
+	root      *RouterTrieNode
+	hashSize  int
 }
 
-func NewRouterTrie(headValue string, hashSize int) *RouterTrie {
+func NewRouterTrie(headValue string, hashSize int, paramName string) *RouterTrie {
 	return &RouterTrie{
-		root:     NewRouterTrieNode(headValue, hashSize, root, false),
-		hashSize: hashSize,
+		root:      NewRouterRootTrieNode(hashSize),
+		hashSize:  hashSize,
+		paramName: paramName,
 	}
 }
 
 func (t *RouterTrie) AddNode(path string, handler Handler) {
+	if path == "/" {
+		t.root.handler = &handler
+		return
+	}
+
 	parts := strings.Split(path, "/")
 	currentNode := t.root
 
-	for _, part := range parts {
-		if len(part) == 0 {
-			continue
-		}
+	if len(parts) > 1 && parts[0] == "" {
+		parts = parts[1:]
+	}
 
-		// TODO: Avoid pattern match
+	for index, part := range parts {
 		var child *RouterTrieNode
 
-		_, isParam := getParam(part)
+		paramName, isParam := getParam(part)
+
 		if isParam {
 			child = currentNode.children.lookupPattern()
 		} else {
@@ -37,15 +43,31 @@ func (t *RouterTrie) AddNode(path string, handler Handler) {
 		}
 
 		if child == nil {
-			patternChild := currentNode.nodeType == pattern
 			if isParam {
-				child = NewRouterTrieNode(part, t.hashSize, pattern, patternChild)
+				child = NewRouterParamTrieNode(paramName, t.hashSize)
+				currentNode.addChild(child)
+				currentNode = child.subTries[0].root
 			} else {
-				child = NewRouterTrieNode(part, t.hashSize, static, patternChild)
+				child = NewRouterStaticTrieNode(part, t.hashSize)
+				currentNode.addChild(child)
+				currentNode = child
 			}
-			fmt.Printf("Is %s pattern child? %v. Parent value: %s\n", child.path, patternChild, currentNode.path)
 
-			currentNode.addChild(child)
+			continue
+		}
+
+		if child.nodeType == pattern && child.subTries != nil {
+			for _, trie := range child.subTries {
+				if trie.paramName == paramName {
+					trie.AddNode(strings.Join(parts[index+1:], "/"), handler)
+					return
+				}
+			}
+
+			newTrie := NewRouterTrie("", t.hashSize, paramName)
+			child.subTries = append(child.subTries, newTrie)
+			child = newTrie.root
+			currentNode = child
 		}
 
 		currentNode = child
@@ -54,29 +76,45 @@ func (t *RouterTrie) AddNode(path string, handler Handler) {
 	currentNode.handler = &handler
 }
 
-func (t *RouterTrie) Lookup(path string) Handler {
+// TODO: FIX THIS METHOD!!!
+func (t *RouterTrie) Lookup(path string) *RouterTrieNode {
+	if path == "/" || path == "" {
+		return t.root
+	}
+
 	parts := strings.Split(path, "/")
 	currentNode := t.root
 
-	for _, part := range parts {
-		if len(part) == 0 {
-			continue
-		}
+	if len(parts) > 1 && parts[0] == "" {
+		parts = parts[1:]
+	}
 
-		child := currentNode.children.lookupAll(part)
+	for index, part := range parts {
+
+		child := currentNode.children.lookupStatic(part)
 		if child == nil {
-			return nil
+			child = currentNode.children.lookupPattern()
+
+			if child == nil {
+				return nil
+			}
+
+			if child.subTries != nil {
+				for _, trie := range child.subTries {
+					subTrieChild := trie.Lookup(strings.Join(parts[index+1:], "/"))
+					if subTrieChild != nil {
+						return subTrieChild
+					}
+				}
+
+				return nil
+			}
 		}
 
 		currentNode = child
 	}
 
-	if currentNode.handler == nil {
-		return nil
-	}
-
-	// fmt.Printf("Is %s pattern child? %v\n", currentNode.path, currentNode.patternChild)
-	return *currentNode.handler
+	return currentNode
 }
 
 func getParam(part string) (paramName string, isParam bool) {

@@ -45,20 +45,6 @@ func (hash *RouterHashTable) insert(trieNode *RouterTrieNode) int {
 	return index
 }
 
-func (hash *RouterHashTable) lookupAll(path string) *RouterTrieNode {
-	if node := hash.lookupStatic(path); node != nil {
-		return node
-	}
-
-	// Search for pattern
-	if node := hash.lookupPattern(); node != nil {
-		// TODO: Implement correct pattern search
-		return node
-	}
-
-	return nil
-}
-
 func (hash *RouterHashTable) lookupPattern() *RouterTrieNode {
 	if t := hash.table[patterIndex]; t != nil {
 		// TODO: Implement correct pattern search
