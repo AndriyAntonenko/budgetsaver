@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
 	_ "github.com/lib/pq"
 )
 
@@ -13,19 +14,10 @@ const (
 	usersTable tableName = "users"
 )
 
-type Config struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
-func NewPostgresDB(config Config) (*sql.DB, error) {
+func NewPostgresDB(cnf config.PostgresConfig) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
+		cnf.Host, cnf.Port, cnf.Username, cnf.Password, cnf.DBName, cnf.SSLMode)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {

@@ -12,10 +12,20 @@ import (
 var instance *AppConfig
 var once sync.Once
 
+type PostgresConfig struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	DBName   string
+	SSLMode  string
+}
+
 type AppConfig struct {
-	Port    string
-	LogFile string
-	Mode    string
+	Port     string
+	LogFile  string
+	Mode     string
+	Postgres PostgresConfig
 }
 
 func InitAppConfig() (*AppConfig, error) {
@@ -36,6 +46,14 @@ func InitAppConfig() (*AppConfig, error) {
 			Port:    viper.GetString("port"),
 			LogFile: viper.GetString("logFile"),
 			Mode:    os.Getenv("MODE"),
+			Postgres: PostgresConfig{
+				Host:     viper.GetString("db.host"),
+				Port:     viper.GetString("db.port"),
+				DBName:   viper.GetString("db.dbName"),
+				SSLMode:  viper.GetString("db.sslMode"),
+				Username: viper.GetString("db.username"),
+				Password: os.Getenv("POSTGRES_PASSWORD"),
+			},
 		}
 	})
 
