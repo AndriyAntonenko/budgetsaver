@@ -1,2 +1,9 @@
 port: "8000"
 logFile: "server.log"
+
+db:
+  host: "localhost"
+  username: "postgres"
+  dbName: "postgres"
+  sslMode: "disable"
+  port: "5432"

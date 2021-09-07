@@ -2,32 +2,19 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	budgetsaver "github.com/AndriyAntonenko/budgetSaver"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
+	"github.com/AndriyAntonenko/budgetSaver/pkg/handler"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
-	"github.com/AndriyAntonenko/goRouter"
+	"github.com/AndriyAntonenko/budgetSaver/pkg/repository"
+	service "github.com/AndriyAntonenko/budgetSaver/pkg/services"
+	"github.com/spf13/viper"
 )
-
-func initRouter() *goRouter.Router {
-	// Testing router
-	r := goRouter.NewRouter()
-
-	r.Get("/api/users/v1/:id/:token/check/:hash", func(w http.ResponseWriter, r *http.Request, ps *goRouter.RouterParams) {
-		fmt.Fprintf(w, "Hard test")
-		fmt.Println(ps.GetString("token"))
-		fmt.Println(ps.ParseInt("id"))
-		fmt.Println(ps.GetString("hash"))
-	})
-
-	return r
-}
 
 func main() {
 	cnf, err := config.InitAppConfig()
@@ -35,16 +22,35 @@ func main() {
 		log.Fatalf("error during config initialization: %s", err.Error())
 	}
 
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		DBName:   viper.GetString("db.dbName"),
+		SSLMode:  viper.GetString("db.sslMode"),
+		Username: viper.GetString("db.username"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+	})
+
+	repo := repository.NewRepository(db)
+	services := service.NewService(repo)
+	handlers := handler.NewHandler(services)
+
+	fileLogger := logger.InitFileLogger("Budget Saver", cnf.LogFile, cnf.Mode == "local")
+
+	if err != nil {
+		fileLogger.Error("postgresql initialization error", err, "func main()")
+		panic(err)
+	}
+
 	srv := new(budgetsaver.Server)
 
-	r := initRouter()
 	go func() {
-		if err := srv.Run(cnf.Port, r); err != nil {
-			log.Fatalf("error during server running: %s", err.Error())
+		if err := srv.Run(cnf.Port, handlers.InitRoutes()); err != nil {
+			fileLogger.Error("error during server running", err, "func main()")
+			os.Exit(0)
 		}
 	}()
 
-	fileLogger := logger.InitFileLogger("Budget Saver", cnf.LogFile, cnf.Mode == "local")
 	fileLogger.Info("Server successfully started", "func main()")
 
 	quit := make(chan os.Signal)
@@ -54,9 +60,9 @@ func main() {
 	<-quit
 
 	fileLogger.Info("Server shutting down", "func main()")
-	fileLogger.Shutdown()
 
 	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Fatalf("error occured on server shutting down: %s", err.Error())
+		fileLogger.Error("error occured on server shutting down", err, "func main()")
+		panic(err)
 	}
 }
