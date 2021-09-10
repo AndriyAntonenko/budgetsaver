@@ -12,7 +12,6 @@ type Authorization interface {
 	GetUserById(string) (domain.UserRecord, error)
 }
 
-// TODO: Implement repository
 type Repository struct {
 	Authorization
 }
