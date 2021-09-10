@@ -8,6 +8,9 @@ import (
 type Authorization interface {
 	CreateUser(domain.UserSignUpPayload) (string, error)
 	Login(domain.UserLoginPayload) (*Tokens, error)
+	ParseRefreshToken(string) (string, error)
+	ParseAccessToken(string) (string, error)
+	GetProfile(string) (*domain.UserProfile, error)
 }
 
 type Service struct {

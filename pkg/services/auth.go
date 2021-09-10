@@ -46,3 +46,16 @@ func (s *AuthService) Login(payload domain.UserLoginPayload) (*Tokens, error) {
 
 	return generateTokens(user.Id)
 }
+
+func (s *AuthService) GetProfile(id string) (*domain.UserProfile, error) {
+	user, err := s.repo.GetUserById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.UserProfile{
+		UserId: user.Id,
+		Email:  user.Email,
+		Name:   user.Name,
+	}, nil
+}

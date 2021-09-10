@@ -35,10 +35,17 @@ func (r *AuthPostgres) CreateUser(payload domain.CreateUserRecord) (string, erro
 }
 
 func (r *AuthPostgres) GetUserByEmail(email string) (domain.UserRecord, error) {
-	var userRecord domain.UserRecord
+	return r.getUserRecordByField("email", email)
+}
 
-	query := fmt.Sprintf("SELECT id, name, email, password_hash, salt FROM %s WHERE email = $1", usersTable)
-	row := r.db.QueryRow(query, email)
+func (r *AuthPostgres) GetUserById(id string) (domain.UserRecord, error) {
+	return r.getUserRecordByField("id", id)
+}
+
+func (r *AuthPostgres) getUserRecordByField(field string, value string) (domain.UserRecord, error) {
+	var userRecord domain.UserRecord
+	query := fmt.Sprintf("SELECT id, name, email, password_hash, salt FROM %s WHERE %s = $1", usersTable, field)
+	row := r.db.QueryRow(query, value)
 	err := row.Scan(&userRecord.Id, &userRecord.Name, &userRecord.Email, &userRecord.PasswordHash, &userRecord.Salt)
 	if err != nil {
 		if err == sql.ErrNoRows {

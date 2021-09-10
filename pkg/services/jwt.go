@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"time"
 
 	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
@@ -8,7 +9,7 @@ import (
 )
 
 type Claims struct {
-	Id string `json:"id"`
+	UserId string `json:"id"`
 	jwt.StandardClaims
 }
 
@@ -24,19 +25,52 @@ const (
 	refreshExpiresIn = time.Hour * 24 * 3
 )
 
+func (s *AuthService) ParseRefreshToken(refreshToken string) (string, error) {
+	return parseToken(refreshToken, config.UseAppConfig().Jwt.RefreshTokenSecret)
+}
+
+func (s *AuthService) ParseAccessToken(accessToken string) (string, error) {
+	return parseToken(accessToken, config.UseAppConfig().Jwt.AccessTokenSecret)
+}
+
+func parseToken(token string, secret string) (string, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := parsedToken.Claims.(*Claims)
+	if !ok {
+		return "", errors.New("token claims are not of type \"Claims\"")
+	}
+
+	if claims.ExpiresAt < time.Now().Unix() {
+		return "", errors.New("token already expired")
+	}
+
+	return claims.UserId, nil
+}
+
 func generateTokens(id string) (*Tokens, error) {
 	accessExpirationDate := time.Now().Add(accessExpiresIn).Unix()
 	refreshExpirationDate := time.Now().Add(refreshExpiresIn).Unix()
 
 	accessClaims := &Claims{
-		Id: id,
+		UserId: id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: accessExpirationDate,
 		},
 	}
 
 	refreshClaims := &Claims{
-		Id: id,
+		UserId: id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: refreshExpirationDate,
 		},

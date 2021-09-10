@@ -25,3 +25,9 @@ type UserRecord struct {
 	Salt         string `db:"salt"`
 	Id           string `db:"id"`
 }
+
+type UserProfile struct {
+	UserId string `json:"userId"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+}

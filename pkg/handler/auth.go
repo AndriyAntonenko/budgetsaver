@@ -55,8 +55,41 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request, _ *goRouter.Rout
 	}
 
 	responseBody, err := json.Marshal(data)
+	if err != nil {
+		logger.UseBasicLogger().Error("Internal server error", err, "func createUser()")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseBody)
+}
+
+func (h *Handler) me(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
+	accessToken, err := extractToken(r)
+	if err != nil {
+		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := h.service.Authorization.ParseAccessToken(accessToken)
+	if err != nil {
+		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	profile, err := h.service.Authorization.GetProfile(userId)
+	if err != nil {
+		logger.UseBasicLogger().Error("Internal server error", err, "func createUser()")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	responseBody, err := json.Marshal(profile)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(responseBody)
 }
