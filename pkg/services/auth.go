@@ -15,7 +15,7 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo}
 }
 
-func (s *AuthService) CreateUser(payload domain.UserSignUp) (string, error) {
+func (s *AuthService) CreateUser(payload domain.UserSignUpPayload) (string, error) {
 	hashedPassword, err := hashPassword(payload.Password)
 	if err != nil {
 		return "", err

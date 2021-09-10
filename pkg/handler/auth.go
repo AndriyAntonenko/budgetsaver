@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
-	var payload domain.UserSignUp
+	var payload domain.UserSignUpPayload
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&payload)
