@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/AndriyAntonenko/budgetSaver/pkg/domain"
@@ -31,4 +32,20 @@ func (r *AuthPostgres) CreateUser(payload domain.CreateUserRecord) (string, erro
 	}
 
 	return id, nil
+}
+
+func (r *AuthPostgres) GetUserByEmail(email string) (domain.UserRecord, error) {
+	var userRecord domain.UserRecord
+
+	query := fmt.Sprintf("SELECT id, name, email, password_hash, salt FROM %s WHERE email = $1", usersTable)
+	row := r.db.QueryRow(query, email)
+	err := row.Scan(&userRecord.Id, &userRecord.Name, &userRecord.Email, &userRecord.PasswordHash, &userRecord.Salt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return userRecord, errors.New("user with such email not found")
+		}
+		return userRecord, err
+	}
+
+	return userRecord, nil
 }

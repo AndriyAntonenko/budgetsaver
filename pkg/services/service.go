@@ -6,7 +6,8 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(domain.User) (string, error)
+	CreateUser(domain.UserSignUp) (string, error)
+	Login(domain.UserLoginPayload) (*Tokens, error)
 }
 
 type Service struct {

@@ -8,6 +8,7 @@ import (
 
 type Authorization interface {
 	CreateUser(domain.CreateUserRecord) (string, error)
+	GetUserByEmail(string) (domain.UserRecord, error)
 }
 
 // TODO: Implement repository

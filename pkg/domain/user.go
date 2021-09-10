@@ -1,10 +1,8 @@
 package domain
 
-type User struct {
-	Id string `db:"id" json:"id"`
-
-	Name     string `db:"name" json:"name"`
-	Email    string `db:"email" json:"email"`
+type UserSignUp struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -13,4 +11,17 @@ type CreateUserRecord struct {
 	Email        string `db:"email"`
 	PasswordHash string `db:"password_hash"`
 	Salt         string `db:"salt"`
+}
+
+type UserRecord struct {
+	Name         string `db:"name"`
+	Email        string `db:"email"`
+	PasswordHash string `db:"password_hash"`
+	Salt         string `db:"salt"`
+	Id           string `db:"id"`
+}
+
+type UserLoginPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

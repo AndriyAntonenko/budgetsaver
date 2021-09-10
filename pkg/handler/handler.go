@@ -17,6 +17,7 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	r := goRouter.NewRouter()
 
 	r.Post("/auth/sign-up", h.createUser)
+	r.Post("/auth/login", h.login)
 
 	return r
 }

@@ -21,11 +21,17 @@ type PostgresConfig struct {
 	SSLMode  string
 }
 
+type JwtConfig struct {
+	AccessTokenSecret  string
+	RefreshTokenSecret string
+}
+
 type AppConfig struct {
 	Port     string
 	LogFile  string
 	Mode     string
 	Postgres PostgresConfig
+	Jwt      JwtConfig
 }
 
 func InitAppConfig() (*AppConfig, error) {
@@ -53,6 +59,10 @@ func InitAppConfig() (*AppConfig, error) {
 				SSLMode:  viper.GetString("db.sslMode"),
 				Username: viper.GetString("db.username"),
 				Password: os.Getenv("POSTGRES_PASSWORD"),
+			},
+			Jwt: JwtConfig{
+				AccessTokenSecret:  os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
+				RefreshTokenSecret: os.Getenv("JWT_REFRESH_TOKEN_SECRET"),
 			},
 		}
 	})
