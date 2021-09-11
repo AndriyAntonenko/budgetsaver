@@ -13,12 +13,18 @@ type Authorization interface {
 	GetProfile(string) (*domain.UserProfile, error)
 }
 
+type Group interface {
+	CreateGroup(string, *domain.CreateGroupPayload) (*domain.Group, error)
+}
+
 type Service struct {
 	Authorization
+	Group
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization),
+		Group:         NewGroupService(repo.Group),
 	}
 }
