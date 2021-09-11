@@ -9,8 +9,8 @@ import (
 )
 
 func (h *Handler) createGroup(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
-	userId, err := h.getUserId(w, r)
-	if err != nil {
+	userId, ok := h.getUserId(w, r)
+	if !ok {
 		return
 	}
 
@@ -24,5 +24,5 @@ func (h *Handler) createGroup(w http.ResponseWriter, r *http.Request, _ *goRoute
 		return
 	}
 
-	h.sendJSON(w, group)
+	h.sendJSON(w, group, http.StatusCreated)
 }

@@ -22,11 +22,16 @@ func NewHandler(srv *service.Service) *Handler {
 func (h *Handler) InitRoutes() *goRouter.Router {
 	r := goRouter.NewRouter()
 
+	// Auth API
 	r.Post("/api/auth/sign-up", h.createUser)
 	r.Post("/api/auth/login", h.login)
 	r.Get("/api/auth/me", h.me)
 
+	// Group API
 	r.Post("/api/group", h.createGroup)
+
+	// budget API
+	r.Post("/api/budget", h.createBudget)
 
 	return r
 }
@@ -45,44 +50,53 @@ func extractToken(r *http.Request) (string, error) {
 	return splitHeader[1], nil
 }
 
-func (h *Handler) getUserId(w http.ResponseWriter, r *http.Request) (string, error) {
+func (h *Handler) errorResponse(message string) map[string]string {
+	res := make(map[string]string)
+	res["status"] = "ERROR"
+	res["message"] = message
+	return res
+}
+
+func (h *Handler) getUserId(w http.ResponseWriter, r *http.Request) (string, bool) {
 	accessToken, err := extractToken(r)
 	if err != nil {
-		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
-		w.WriteHeader(http.StatusUnauthorized)
-		return "", err
+		logger.UseBasicLogger().Error("Unauthorized error", err, "func getUserId()")
+		h.sendJSON(w, h.errorResponse("Unauthorized"), http.StatusUnauthorized)
+		return "", false
 	}
 
 	userId, err := h.service.Authorization.ParseAccessToken(accessToken)
 	if err != nil {
-		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
-		w.WriteHeader(http.StatusUnauthorized)
-		return "", err
+		logger.UseBasicLogger().Error("Unauthorized error", err, "func getUserId()")
+		h.sendJSON(w, h.errorResponse("Unauthorized"), http.StatusUnauthorized)
+		return "", false
 	}
 
-	return userId, err
+	return userId, true
 }
 
-func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}) {
+func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}, status int) {
 	responseBody, err := json.Marshal(payload)
 
 	if err != nil {
-		logger.UseBasicLogger().Error("Internal server error", err, "func createUser()")
+		logger.UseBasicLogger().Error("Internal server error", err, "func sendJSON()")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(status)
 	w.Write(responseBody)
 }
 
-func (h *Handler) parseJSONBody(w http.ResponseWriter, r *http.Request, pt interface{}) {
+func (h *Handler) parseJSONBody(w http.ResponseWriter, r *http.Request, pt interface{}) error {
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&pt)
+	err := decoder.Decode(pt)
 	if err != nil {
 		logger.UseBasicLogger().Error("Bad request", err, "func createGroup()")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		h.sendJSON(w, h.errorResponse("Cannot parse json"), http.StatusBadRequest)
+		return err
 	}
+
+	return nil
 }

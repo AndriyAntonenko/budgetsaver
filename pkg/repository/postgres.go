@@ -14,6 +14,7 @@ const (
 	usersTable      tableName = "users"
 	groupTable      tableName = "group"
 	usersGroupTable tableName = "users_groups"
+	budgetTable     tableName = "budget"
 )
 
 func NewPostgresDB(cnf config.PostgresConfig) (*sql.DB, error) {

@@ -17,14 +17,20 @@ type Group interface {
 	CreateGroup(string, *domain.CreateGroupPayload) (*domain.Group, error)
 }
 
+type Budget interface {
+	CreateBudget(string, *domain.CreateBudgetPayload) (*domain.Budget, error)
+}
+
 type Service struct {
 	Authorization
 	Group
+	Budget
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization),
 		Group:         NewGroupService(repo.Group),
+		Budget:        NewBudgetService(repo.Budget),
 	}
 }
