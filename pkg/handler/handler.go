@@ -30,7 +30,7 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	// Group API
 	r.Post("/api/group", h.createGroup)
 
-	// budget API
+	// Budget API
 	r.Post("/api/budget", h.createBudget)
 
 	return r

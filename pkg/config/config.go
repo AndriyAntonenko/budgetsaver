@@ -53,11 +53,11 @@ func InitAppConfig() (*AppConfig, error) {
 			LogFile: viper.GetString("logFile"),
 			Mode:    os.Getenv("MODE"),
 			Postgres: PostgresConfig{
-				Host:     viper.GetString("db.host"),
-				Port:     viper.GetString("db.port"),
-				DBName:   viper.GetString("db.dbName"),
+				Host:     os.Getenv("POSTGRES_HOST"),
+				Port:     os.Getenv("POSTGRES_PORT"),
+				DBName:   os.Getenv("POSTGRES_DB"),
 				SSLMode:  viper.GetString("db.sslMode"),
-				Username: viper.GetString("db.username"),
+				Username: os.Getenv("POSTGRES_USER"),
 				Password: os.Getenv("POSTGRES_PASSWORD"),
 			},
 			Jwt: JwtConfig{
