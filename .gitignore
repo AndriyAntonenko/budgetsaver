@@ -5,6 +5,8 @@ bin/
 # for docker-compose
 .env.dev
 
-
 # Logs
 server.log
+
+# volumes
+postgres-data/
