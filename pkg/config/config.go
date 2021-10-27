@@ -84,22 +84,19 @@ func initConfig() error {
 }
 
 func initEnv() {
-	var envFile string
+	envFile := ".env.local"
 	mode := os.Getenv("MODE")
-	if mode == "dev" {
-		envFile = ".env.dev"
-	} else if mode == "local" {
-		envFile = ".env.local"
-	} else {
-		envFile = ".env"
-	}
 
-	_, err := os.Stat(envFile)
-	// if there no .env file just return
-	if errors.Is(err, os.ErrNotExist) {
+	// if we runs locally
+	if mode != "local" {
+		// we will read env variables from os
 		return
 	}
 
+	_, err := os.Stat(envFile)
+	// if there no .env.local file just return
+	if errors.Is(err, os.ErrNotExist) {
+		return
+	}
 	godotenv.Load(envFile)
-	return
 }

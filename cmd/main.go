@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("error during config initialization: %s", err.Error())
 	}
 
-	fileLogger := logger.InitFileLogger("Budget Saver", cnf.LogFile, cnf.Mode == "local")
+	fileLogger := logger.InitFileLogger("Budget Saver", cnf.LogFile, cnf.Mode == "local" || cnf.Mode == "dev")
 
 	db, err := repository.NewPostgresDB(cnf.Postgres)
 	if err != nil {
