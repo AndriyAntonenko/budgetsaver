@@ -63,6 +63,7 @@ func InitAppConfig() (*AppConfig, error) {
 				RefreshTokenSecret: os.Getenv("JWT_REFRESH_TOKEN_SECRET"),
 			},
 		}
+
 	})
 
 	return instance, err
@@ -83,12 +84,22 @@ func initConfig() error {
 }
 
 func initEnv() {
-	_, err := os.Stat(".env")
+	var envFile string
+	mode := os.Getenv("MODE")
+	if mode == "dev" {
+		envFile = ".env.dev"
+	} else if mode == "local" {
+		envFile = ".env.local"
+	} else {
+		envFile = ".env"
+	}
+
+	_, err := os.Stat(envFile)
 	// if there no .env file just return
 	if errors.Is(err, os.ErrNotExist) {
 		return
 	}
 
-	godotenv.Load()
+	godotenv.Load(envFile)
 	return
 }
