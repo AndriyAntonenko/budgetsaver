@@ -1,5 +1,9 @@
 bin/
 .env
+# for local development
+.env.local
+# for docker-compose
+.env.dev
 
 
 # Logs

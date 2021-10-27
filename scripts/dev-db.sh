@@ -1,4 +1,4 @@
-# /bin/sh
+#!/bin/bash
 
 # Run container
 docker run -p 5432:5432 -e POSTGRES_PASSWORD='qwerty' --rm -d --name bs-dev-db postgres

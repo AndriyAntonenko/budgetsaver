@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"sync"
@@ -43,10 +44,7 @@ func InitAppConfig() (*AppConfig, error) {
 			return
 		}
 
-		err = godotenv.Load()
-		if err != nil {
-			return
-		}
+		initEnv()
 
 		instance = &AppConfig{
 			Port:    viper.GetString("port"),
@@ -82,4 +80,15 @@ func initConfig() error {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
+}
+
+func initEnv() {
+	_, err := os.Stat(".env")
+	// if there no .env file just return
+	if errors.Is(err, os.ErrNotExist) {
+		return
+	}
+
+	godotenv.Load()
+	return
 }
