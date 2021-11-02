@@ -22,6 +22,13 @@ func NewHandler(srv *service.Service) *Handler {
 func (h *Handler) InitRoutes() *goRouter.Router {
 	r := goRouter.NewRouter()
 
+	r.EnableCors(&goRouter.RouterCors{
+		Origins: "*",
+		Methods: "GET, POST, DELETE, PUT, PATCH",
+		Headers: "*",
+		MaxAge:  "64800",
+	})
+
 	// Auth API
 	r.Post("/api/auth/sign-up", h.createUser)
 	r.Post("/api/auth/login", h.login)

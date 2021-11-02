@@ -20,16 +20,14 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, _ *goRouter
 		return
 	}
 
-	id, err := h.service.CreateUser(payload)
+	tokens, err := h.service.CreateUser(payload)
 	if err != nil {
 		logger.UseBasicLogger().Error("Internal server error", err, "func createUser()")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	responseBody, err := json.Marshal(map[string]interface{}{
-		"id": id,
-	})
+	responseBody, err := json.Marshal(tokens)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

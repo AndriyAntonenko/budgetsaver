@@ -6,7 +6,7 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(domain.UserSignUpPayload) (string, error)
+	CreateUser(domain.UserSignUpPayload) (*Tokens, error)
 	Login(domain.UserLoginPayload) (*Tokens, error)
 	ParseRefreshToken(string) (string, error)
 	ParseAccessToken(string) (string, error)

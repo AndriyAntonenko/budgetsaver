@@ -15,18 +15,24 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo}
 }
 
-func (s *AuthService) CreateUser(payload domain.UserSignUpPayload) (string, error) {
+func (s *AuthService) CreateUser(payload domain.UserSignUpPayload) (*Tokens, error) {
 	hashedPassword, err := hashPassword(payload.Password)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return s.repo.CreateUser(domain.CreateUserRecord{
+	userId, err := s.repo.CreateUser(domain.CreateUserRecord{
 		Name:         payload.Name,
 		Email:        payload.Email,
 		PasswordHash: hashedPassword.passwordHash,
 		Salt:         hashedPassword.salt,
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return generateTokens(userId)
 }
 
 func (s *AuthService) Login(payload domain.UserLoginPayload) (*Tokens, error) {
