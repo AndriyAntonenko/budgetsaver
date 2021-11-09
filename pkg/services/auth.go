@@ -47,7 +47,7 @@ func (s *AuthService) Login(payload domain.UserLoginPayload) (*Tokens, error) {
 	}
 
 	if hashString != user.PasswordHash {
-		return nil, errors.New("Password is not match")
+		return nil, errors.New("password is not match")
 	}
 
 	return generateTokens(user.Id)

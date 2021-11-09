@@ -34,12 +34,6 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	r.Post("/api/auth/login", h.login)
 	r.Get("/api/auth/me", h.me)
 
-	// Group API
-	r.Post("/api/group", h.createGroup)
-
-	// Budget API
-	r.Post("/api/budget", h.createBudget)
-
 	return r
 }
 

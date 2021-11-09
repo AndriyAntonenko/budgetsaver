@@ -12,24 +12,12 @@ type Authorization interface {
 	GetUserById(string) (domain.UserRecord, error)
 }
 
-type Group interface {
-	CreateGroup(string, *domain.CreateGroupPayload) (*domain.Group, error)
-}
-
-type Budget interface {
-	CreateBudget(string, *domain.CreateBudgetPayload) (*domain.Budget, error)
-}
-
 type Repository struct {
 	Authorization
-	Group
-	Budget
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
-		Group:         NewGroupPostgres(db),
-		Budget:        NewBudgetPostgres(db),
 	}
 }

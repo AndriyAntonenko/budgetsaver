@@ -11,10 +11,7 @@ import (
 type tableName string
 
 const (
-	usersTable      tableName = "users"
-	groupTable      tableName = "group"
-	usersGroupTable tableName = "users_groups"
-	budgetTable     tableName = "budget"
+	usersTable tableName = "users"
 )
 
 func NewPostgresDB(cnf config.PostgresConfig) (*sql.DB, error) {
