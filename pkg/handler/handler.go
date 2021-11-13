@@ -33,6 +33,7 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	r.Post("/api/auth/sign-up", h.createUser)
 	r.Post("/api/auth/login", h.login)
 	r.Get("/api/auth/me", h.me)
+	r.Get("/api/auth/check-auth", h.checkAuth)
 
 	return r
 }
@@ -51,30 +52,26 @@ func extractToken(r *http.Request) (string, error) {
 	return splitHeader[1], nil
 }
 
-func (h *Handler) errorResponse(message string) map[string]string {
-	res := make(map[string]string)
-	res["status"] = "ERROR"
-	res["message"] = message
-	return res
-}
-
-func (h *Handler) getUserId(w http.ResponseWriter, r *http.Request) (string, bool) {
+func (h *Handler) handleAuth(r *http.Request) (string, error) {
 	accessToken, err := extractToken(r)
 	if err != nil {
-		logger.UseBasicLogger().Error("Unauthorized error", err, "func getUserId()")
-		h.sendJSON(w, h.errorResponse("Unauthorized"), http.StatusUnauthorized)
-		return "", false
+		return "", errors.New("unauthorized error")
 	}
 
 	userId, err := h.service.Authorization.ParseAccessToken(accessToken)
 	if err != nil {
-		logger.UseBasicLogger().Error("Unauthorized error", err, "func getUserId()")
-		h.sendJSON(w, h.errorResponse("Unauthorized"), http.StatusUnauthorized)
-		return "", false
+		return "", errors.New("unauthorized error")
 	}
 
-	return userId, true
+	return userId, nil
 }
+
+// func (h *Handler) errorResponse(message string) map[string]string {
+// 	res := make(map[string]string)
+// 	res["status"] = "ERROR"
+// 	res["message"] = message
+// 	return res
+// }
 
 func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}, status int) {
 	responseBody, err := json.Marshal(payload)
@@ -90,14 +87,14 @@ func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}, status in
 	w.Write(responseBody)
 }
 
-func (h *Handler) parseJSONBody(w http.ResponseWriter, r *http.Request, pt interface{}) error {
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(pt)
-	if err != nil {
-		logger.UseBasicLogger().Error("Bad request", err, "func createGroup()")
-		h.sendJSON(w, h.errorResponse("Cannot parse json"), http.StatusBadRequest)
-		return err
-	}
+// func (h *Handler) parseJSONBody(w http.ResponseWriter, r *http.Request, pt interface{}) error {
+// 	decoder := json.NewDecoder(r.Body)
+// 	err := decoder.Decode(pt)
+// 	if err != nil {
+// 		logger.UseBasicLogger().Error("Bad request", err, "func createGroup()")
+// 		h.sendJSON(w, h.errorResponse("Cannot parse json"), http.StatusBadRequest)
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

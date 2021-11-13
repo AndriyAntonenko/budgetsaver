@@ -27,11 +27,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, _ *goRouter
 		return
 	}
 
-	responseBody, err := json.Marshal(tokens)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(responseBody)
+	h.sendJSON(w, tokens, http.StatusCreated)
 }
 
 func (h *Handler) login(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
@@ -52,27 +48,11 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request, _ *goRouter.Rout
 		return
 	}
 
-	responseBody, err := json.Marshal(data)
-	if err != nil {
-		logger.UseBasicLogger().Error("Internal server error", err, "func createUser()")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(responseBody)
+	h.sendJSON(w, data, http.StatusOK)
 }
 
 func (h *Handler) me(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
-	accessToken, err := extractToken(r)
-	if err != nil {
-		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	userId, err := h.service.Authorization.ParseAccessToken(accessToken)
+	userId, err := h.handleAuth(r)
 	if err != nil {
 		logger.UseBasicLogger().Error("Unauthorized error", err, "func me()")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -86,8 +66,16 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterP
 		return
 	}
 
-	responseBody, err := json.Marshal(profile)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(responseBody)
+	h.sendJSON(w, profile, http.StatusOK)
+}
+
+func (h *Handler) checkAuth(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
+	_, err := h.handleAuth(r)
+	if err != nil {
+		logger.UseBasicLogger().Error("Unauthorized error", err, "func checkAuth()")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	w.Write(nil)
 }
