@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/AndriyAntonenko/budgetSaver/pkg/domain"
+	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/logger"
 	"github.com/AndriyAntonenko/goRouter"
 )
 
 func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
-	var payload domain.UserSignUpPayload
+	var payload dto.UserSignUpPayload
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&payload)
@@ -31,7 +31,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, _ *goRouter
 }
 
 func (h *Handler) login(w http.ResponseWriter, r *http.Request, _ *goRouter.RouterParams) {
-	var payload domain.UserLoginPayload
+	var payload dto.UserLoginPayload
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&payload)

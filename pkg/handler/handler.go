@@ -35,6 +35,10 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	r.Get("/api/auth/me", h.me)
 	r.Get("/api/auth/check-auth", h.checkAuth)
 
+	// Finance group API
+	r.Post("/api/finance-group", h.createFinanceGroup)
+	r.Get("/api/finance-group", h.fetchFinanceGroups)
+
 	return r
 }
 
@@ -66,13 +70,6 @@ func (h *Handler) handleAuth(r *http.Request) (string, error) {
 	return userId, nil
 }
 
-// func (h *Handler) errorResponse(message string) map[string]string {
-// 	res := make(map[string]string)
-// 	res["status"] = "ERROR"
-// 	res["message"] = message
-// 	return res
-// }
-
 func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}, status int) {
 	responseBody, err := json.Marshal(payload)
 
@@ -87,14 +84,12 @@ func (h *Handler) sendJSON(w http.ResponseWriter, payload interface{}, status in
 	w.Write(responseBody)
 }
 
-// func (h *Handler) parseJSONBody(w http.ResponseWriter, r *http.Request, pt interface{}) error {
-// 	decoder := json.NewDecoder(r.Body)
-// 	err := decoder.Decode(pt)
-// 	if err != nil {
-// 		logger.UseBasicLogger().Error("Bad request", err, "func createGroup()")
-// 		h.sendJSON(w, h.errorResponse("Cannot parse json"), http.StatusBadRequest)
-// 		return err
-// 	}
+func (h *Handler) parseJSONBody(r *http.Request, pt interface{}) error {
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(pt)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}

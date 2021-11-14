@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/AndriyAntonenko/budgetSaver/pkg/domain"
+	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/repository"
 )
 
@@ -15,13 +15,13 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo}
 }
 
-func (s *AuthService) CreateUser(payload domain.UserSignUpPayload) (*Tokens, error) {
+func (s *AuthService) CreateUser(payload dto.UserSignUpPayload) (*Tokens, error) {
 	hashedPassword, err := hashPassword(payload.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	userId, err := s.repo.CreateUser(domain.CreateUserRecord{
+	userId, err := s.repo.CreateUser(repository.CreateUserRecord{
 		Name:         payload.Name,
 		Email:        payload.Email,
 		PasswordHash: hashedPassword.passwordHash,
@@ -35,7 +35,7 @@ func (s *AuthService) CreateUser(payload domain.UserSignUpPayload) (*Tokens, err
 	return generateTokens(userId)
 }
 
-func (s *AuthService) Login(payload domain.UserLoginPayload) (*Tokens, error) {
+func (s *AuthService) Login(payload dto.UserLoginPayload) (*Tokens, error) {
 	user, err := s.repo.GetUserByEmail(payload.Email)
 	if err != nil {
 		return nil, err
@@ -53,13 +53,13 @@ func (s *AuthService) Login(payload domain.UserLoginPayload) (*Tokens, error) {
 	return generateTokens(user.Id)
 }
 
-func (s *AuthService) GetProfile(id string) (*domain.UserProfile, error) {
+func (s *AuthService) GetProfile(id string) (*dto.UserProfile, error) {
 	user, err := s.repo.GetUserById(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.UserProfile{
+	return &dto.UserProfile{
 		UserId: user.Id,
 		Email:  user.Email,
 		Name:   user.Name,
