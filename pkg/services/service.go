@@ -20,14 +20,21 @@ type FinanceGroup interface {
 	GetUsersFinanceGroups(string) ([]dto.FinanceGroup, error)
 }
 
+type Budget interface {
+	// pass user id and payload
+	CreateBudget(string, dto.CreateBudgetPayload) (*dto.Budget, *ServiceError)
+}
+
 type Service struct {
 	Authorization
 	FinanceGroup
+	Budget
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization),
 		FinanceGroup:  NewFinanceGroupService(repo.FinanceGroup),
+		Budget:        NewBudgetService(repo.Budget, repo.FinanceGroup),
 	}
 }

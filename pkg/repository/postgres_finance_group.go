@@ -104,3 +104,18 @@ func (r *FinanceGroupPostgres) GetUsersFinanceGroups(userId string) ([]FinanceGr
 
 	return groups, nil
 }
+
+func (r *FinanceGroupPostgres) GetUserRoleInFinanceGroup(groupId string, userId string) (domain.FinanceGroupRole, error) {
+	var role domain.FinanceGroupRole
+	dbQuery := fmt.Sprintf("SELECT \"role\" FROM %s WHERE group_id = $1 AND user_id = $2", usersFinanceGroupTable)
+	row := r.db.QueryRow(dbQuery, groupId, userId)
+	err := row.Scan(&role)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", err
+	}
+
+	return role, nil
+}

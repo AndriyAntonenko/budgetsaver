@@ -39,6 +39,8 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	r.Post("/api/finance-group", h.createFinanceGroup)
 	r.Get("/api/finance-group", h.fetchFinanceGroups)
 
+	// Budget API
+	r.Post("/api/budget", h.createBudget)
 	return r
 }
 

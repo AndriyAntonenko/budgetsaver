@@ -46,3 +46,20 @@ type FinanceGroupWithMemberCount struct {
 	DeletedAt   sql.NullTime `db:"deleted_at"`
 	MemberCount int          `db:"members_count"`
 }
+
+// BUDGET TABLE ANNOTATIONS
+
+type CreateBudgetRecord struct {
+	Creator        string `db:"creator"`
+	Name           string `db:"name"`
+	Description    string `db:"description"`
+	FinanceGroupId string `db:"finance_group_id"`
+}
+
+type BudgetRecord struct {
+	Id             string `db:"id"`
+	Creator        string `db:"creator"`
+	Name           string `db:"name"`
+	Description    string `db:"description"`
+	FinanceGroupId string `db:"finance_group_id"`
+}

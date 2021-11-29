@@ -1,3 +1,5 @@
+DROP TABLE budget;
+
 DROP TABLE users_finance_group;
 
 DROP TYPE IF EXISTS finance_group_role;

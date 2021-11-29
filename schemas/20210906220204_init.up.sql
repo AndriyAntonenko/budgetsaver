@@ -42,3 +42,24 @@ CREATE TABLE users_finance_group
             REFERENCES users("id")
                 ON DELETE NO ACTION
 );
+
+CREATE TABLE budget
+(
+    "id" uuid not null unique default uuid_generate_v4(),
+    "finance_group_id" uuid not null,
+    "name" varchar(255) not null,
+    "description" text null,
+    "creator" uuid not null,
+    "created_at" timestamp default current_timestamp,
+    "deleted_at" timestamp null,
+
+    CONSTRAINT budget_finance_group_fk
+        FOREIGN KEY("finance_group_id") 
+            REFERENCES finance_group("id")
+                ON DELETE NO ACTION,
+
+    CONSTRAINT budget_creator_fk
+        FOREIGN KEY("creator") 
+            REFERENCES users("id")
+                ON DELETE NO ACTION
+);
