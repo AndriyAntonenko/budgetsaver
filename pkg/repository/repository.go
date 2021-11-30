@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/AndriyAntonenko/budgetSaver/pkg/domain"
 )
@@ -10,6 +11,7 @@ type Authorization interface {
 	CreateUser(CreateUserRecord) (string, error)
 	GetUserByEmail(string) (UserRecord, error)
 	GetUserById(string) (UserRecord, error)
+	UpdateLastLogin(string, time.Time) (UserRecord, error)
 }
 
 type FinanceGroup interface {

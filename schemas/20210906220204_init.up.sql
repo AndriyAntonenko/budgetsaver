@@ -7,8 +7,9 @@ CREATE TABLE users
     "email" varchar(255) not null unique,
     "password_hash" varchar(255) not null,
     "salt" varchar(255) not null,
-    "created_at" timestamp default current_timestamp,
-    "deleted_at" timestamp null
+    "last_login_at" timestamp with time zone null,
+    "created_at" timestamp with time zone default current_timestamp,
+    "deleted_at" timestamp with time zone null
 );
 
 CREATE TABLE finance_group
@@ -16,8 +17,8 @@ CREATE TABLE finance_group
     "id" uuid not null unique default uuid_generate_v4(),
     "name" varchar(255) not null,
     "description" varchar(255) not null,
-    "created_at" timestamp default current_timestamp,
-    "deleted_at" timestamp null
+    "created_at" timestamp with time zone default current_timestamp,
+    "deleted_at" timestamp with time zone null
 );
 
 CREATE TYPE finance_group_role AS ENUM ('owner', 'admin', 'member');
@@ -27,8 +28,8 @@ CREATE TABLE users_finance_group
     "user_id" uuid not null,
     "group_id" uuid not null,
     "role" finance_group_role not null,
-    "created_at" timestamp default current_timestamp,
-    "deleted_at" timestamp null,
+    "created_at" timestamp with time zone default current_timestamp,
+    "deleted_at" timestamp with time zone null,
 
     PRIMARY KEY ("user_id", "group_id"),
     
@@ -50,8 +51,8 @@ CREATE TABLE budget
     "name" varchar(255) not null,
     "description" text null,
     "creator" uuid not null,
-    "created_at" timestamp default current_timestamp,
-    "deleted_at" timestamp null,
+    "created_at" timestamp with time zone default current_timestamp,
+    "deleted_at" timestamp with time zone null,
 
     CONSTRAINT budget_finance_group_fk
         FOREIGN KEY("finance_group_id") 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/repository"
@@ -21,18 +22,20 @@ func (s *AuthService) CreateUser(payload dto.UserSignUpPayload) (*Tokens, error)
 		return nil, err
 	}
 
+	iat := time.Now()
 	userId, err := s.repo.CreateUser(repository.CreateUserRecord{
 		Name:         payload.Name,
 		Email:        payload.Email,
 		PasswordHash: hashedPassword.passwordHash,
 		Salt:         hashedPassword.salt,
+		LastLoginAt:  iat,
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return generateTokens(userId)
+	return generateTokens(userId, iat)
 }
 
 func (s *AuthService) Login(payload dto.UserLoginPayload) (*Tokens, error) {
@@ -50,7 +53,13 @@ func (s *AuthService) Login(payload dto.UserLoginPayload) (*Tokens, error) {
 		return nil, errors.New("password is not match")
 	}
 
-	return generateTokens(user.Id)
+	iat := time.Now()
+	user, err = s.repo.UpdateLastLogin(user.Id, iat)
+	if err != nil {
+		return nil, err
+	}
+
+	return generateTokens(user.Id, iat)
 }
 
 func (s *AuthService) GetProfile(id string) (*dto.UserProfile, error) {

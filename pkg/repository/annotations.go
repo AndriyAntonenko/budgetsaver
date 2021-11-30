@@ -7,10 +7,11 @@ import (
 
 // USER TABLE ANNOTATIONS
 type CreateUserRecord struct {
-	Name         string `db:"name"`
-	Email        string `db:"email"`
-	PasswordHash string `db:"password_hash"`
-	Salt         string `db:"salt"`
+	Name         string    `db:"name"`
+	Email        string    `db:"email"`
+	PasswordHash string    `db:"password_hash"`
+	Salt         string    `db:"salt"`
+	LastLoginAt  time.Time `db:"last_login_at"`
 }
 
 type UserRecord struct {
@@ -19,6 +20,7 @@ type UserRecord struct {
 	PasswordHash string       `db:"password_hash"`
 	Salt         string       `db:"salt"`
 	Id           string       `db:"id"`
+	LastLoginAt  sql.NullTime `db:"last_login_at"`
 	CreatedAt    time.Time    `db:"created_at"`
 	DeletedAt    sql.NullTime `db:"deleted_at"`
 }

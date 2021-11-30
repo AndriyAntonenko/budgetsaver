@@ -9,7 +9,8 @@ import (
 )
 
 type Claims struct {
-	UserId string `json:"id"`
+	UserId string    `json:"id"`
+	Iat    time.Time `json:"iat"`
 	jwt.StandardClaims
 }
 
@@ -26,14 +27,33 @@ const (
 )
 
 func (s *AuthService) ParseRefreshToken(refreshToken string) (string, error) {
-	return parseToken(refreshToken, config.UseAppConfig().Jwt.RefreshTokenSecret)
+	claims, err := parseToken(refreshToken, config.UseAppConfig().Jwt.RefreshTokenSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return claims.UserId, nil
 }
 
 func (s *AuthService) ParseAccessToken(accessToken string) (string, error) {
-	return parseToken(accessToken, config.UseAppConfig().Jwt.AccessTokenSecret)
+	claims, err := parseToken(accessToken, config.UseAppConfig().Jwt.AccessTokenSecret)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.repo.GetUserById(claims.UserId)
+	if err != nil {
+		return "", err
+	}
+
+	if user.LastLoginAt.Time.UTC().Unix() != claims.Iat.UTC().Unix() {
+		return "", errors.New("session expired, wrong iat")
+	}
+
+	return claims.UserId, nil
 }
 
-func parseToken(token string, secret string) (string, error) {
+func parseToken(token string, secret string) (*Claims, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
@@ -43,27 +63,28 @@ func parseToken(token string, secret string) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	claims, ok := parsedToken.Claims.(*Claims)
 	if !ok {
-		return "", errors.New("token claims are not of type \"Claims\"")
+		return nil, errors.New("token claims are not of type \"Claims\"")
 	}
 
 	if claims.ExpiresAt < time.Now().Unix() {
-		return "", errors.New("token already expired")
+		return nil, errors.New("token already expired")
 	}
 
-	return claims.UserId, nil
+	return claims, nil
 }
 
-func generateTokens(id string) (*Tokens, error) {
+func generateTokens(id string, iat time.Time) (*Tokens, error) {
 	accessExpirationDate := time.Now().Add(accessExpiresIn).Unix()
 	refreshExpirationDate := time.Now().Add(refreshExpiresIn).Unix()
 
 	accessClaims := &Claims{
 		UserId: id,
+		Iat:    iat,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: accessExpirationDate,
 		},
