@@ -1,3 +1,7 @@
+DROP TABLE planned_payments;
+
+DROP TABLE budget_plans;
+
 DROP TABLE budget;
 
 DROP TABLE users_finance_group;

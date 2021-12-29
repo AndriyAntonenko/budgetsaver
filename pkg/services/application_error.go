@@ -20,4 +20,5 @@ const (
 	UnexpectedError                = "UNEXPECTED"
 	UnknownFinanceGroupMemberError = "UNKNOWN_GROUP_MEMBER"
 	ActionForbiddenError           = "ACTION_FORBIDDEN"
+	EntityNotFound                 = "ENTITY_NOT_FOUND"
 )

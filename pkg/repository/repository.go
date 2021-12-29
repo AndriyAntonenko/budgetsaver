@@ -25,12 +25,19 @@ type FinanceGroup interface {
 
 type Budget interface {
 	CreateBudget(CreateBudgetRecord) (*BudgetRecord, error)
+	// budget id, user id
+	GetUserBudget(string, string) (*BudgetRecord, error)
+}
+
+type BudgetTx interface {
+	CreateBudgetTx(CreateBudgetTxRecord) (*BudgetTxRecord, error)
 }
 
 type Repository struct {
 	Authorization
 	FinanceGroup
 	Budget
+	BudgetTx
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -38,5 +45,6 @@ func NewRepository(db *sql.DB) *Repository {
 		Authorization: NewAuthPostgres(db),
 		FinanceGroup:  NewFinanceGroupPostgres(db),
 		Budget:        NewBudgetPostgres(db),
+		BudgetTx:      NewBudgetTXPostgres(db),
 	}
 }

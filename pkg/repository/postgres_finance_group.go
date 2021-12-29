@@ -74,7 +74,7 @@ func (r *FinanceGroupPostgres) GetUsersFinanceGroups(userId string) ([]FinanceGr
 				SELECT
 					ufg2.group_id
 				FROM
-					users_finance_group ufg2
+					%s ufg2
 				WHERE
 					ufg2.user_id = $1
 			)
@@ -84,7 +84,7 @@ func (r *FinanceGroupPostgres) GetUsersFinanceGroups(userId string) ([]FinanceGr
 			fg.description ,
 			fg.created_at ,
 			fg.deleted_at ;
-	`, financeGroupTable, usersFinanceGroupTable)
+	`, financeGroupTable, usersFinanceGroupTable, usersFinanceGroupTable)
 
 	rows, err := r.db.Query(query, userId)
 	if err != nil {

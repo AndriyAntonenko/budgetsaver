@@ -23,18 +23,29 @@ type FinanceGroup interface {
 type Budget interface {
 	// pass user id and payload
 	CreateBudget(string, dto.CreateBudgetPayload) (*dto.Budget, *ServiceError)
+	// user id, budget id
+	FetchUserBudget(string, string) (*dto.Budget, *ServiceError)
+}
+
+type BudgetTx interface {
+	// user id, budget id and payload
+	CreateBudgetTx(string, string, dto.CreateBudgetTxDto) (*dto.BudgetTxDto, *ServiceError)
 }
 
 type Service struct {
 	Authorization
 	FinanceGroup
 	Budget
+	BudgetTx
 }
 
 func NewService(repo *repository.Repository) *Service {
+	budgetService := NewBudgetService(repo.Budget, repo.FinanceGroup)
+
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization),
 		FinanceGroup:  NewFinanceGroupService(repo.FinanceGroup),
 		Budget:        NewBudgetService(repo.Budget, repo.FinanceGroup),
+		BudgetTx:      NewTxService(repo.BudgetTx, budgetService),
 	}
 }

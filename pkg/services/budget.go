@@ -52,3 +52,18 @@ func (s *BudgetService) CreateBudget(userId string, payload dto.CreateBudgetPayl
 		GroupId:     newBudget.FinanceGroupId,
 	}, nil
 }
+
+func (s *BudgetService) FetchUserBudget(userId string, budgetId string) (*dto.Budget, *ServiceError) {
+	budget, err := s.budgetRepo.GetUserBudget(budgetId, userId)
+	if err != nil {
+		return nil, NewServiceError(EntityNotFound, err.Error())
+	}
+
+	return &dto.Budget{
+		Id:          budget.Id,
+		Name:        budget.Name,
+		Description: budget.Description,
+		Creator:     budget.Creator,
+		GroupId:     budget.FinanceGroupId,
+	}, nil
+}

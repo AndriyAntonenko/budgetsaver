@@ -12,9 +12,10 @@ type tableName string
 
 const (
 	usersTable             tableName = "users"
-	financeGroupTable      tableName = "finance_group"
-	usersFinanceGroupTable tableName = "users_finance_group"
-	budgetTable            tableName = "budget"
+	financeGroupTable      tableName = "finance_groups"
+	usersFinanceGroupTable tableName = "users_finance_groups"
+	budgetTable            tableName = "budgets"
+	budgetTxTable          tableName = "budget_txs"
 )
 
 func NewPostgresDB(cnf config.PostgresConfig) (*sql.DB, error) {

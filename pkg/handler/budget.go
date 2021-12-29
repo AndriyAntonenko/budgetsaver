@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
@@ -28,12 +29,12 @@ func (h *Handler) createBudget(w http.ResponseWriter, r *http.Request, _ *goRout
 	budget, serviceErr := h.service.Budget.CreateBudget(userId, budgetPayload)
 	if serviceErr != nil {
 		if serviceErr.Id == service.ActionForbiddenError || serviceErr.Id == service.UnknownFinanceGroupMemberError {
-			logger.UseBasicLogger().Error("Service error: ", err, "func createBudget()")
+			logger.UseBasicLogger().Error("Service error: ", errors.New(serviceErr.Error()), "func createBudget()")
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
-		logger.UseBasicLogger().Error("Service error: ", err, "func createBudget()")
+		logger.UseBasicLogger().Error("Service error: ", errors.New(serviceErr.Error()), "func createBudget()")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

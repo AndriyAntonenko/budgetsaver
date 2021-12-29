@@ -65,3 +65,30 @@ type BudgetRecord struct {
 	Description    string `db:"description"`
 	FinanceGroupId string `db:"finance_group_id"`
 }
+
+// BUDGET TX TABLE ANNOTATIONS
+
+type BudgetTxRecord struct {
+	Id          string       `db:"id"`
+	BudgetId    string       `db:"budget_id"`
+	Title       string       `db:"title"`
+	Description string       `db:"description"`
+	From        string       `db:"from"`
+	To          string       `db:"to"`
+	Amount      float64      `db:"amount"`
+	Author      string       `db:"author"`
+	TxTime      time.Time    `db:"tx_time"`
+	CreatedAt   time.Time    `db:"created_at"`
+	DeletedAt   sql.NullTime `db:"deleted_at"`
+}
+
+type CreateBudgetTxRecord struct {
+	BudgetId    string    `db:"budget_id"`
+	Title       string    `db:"title"`
+	Description string    `db:"description"`
+	From        string    `db:"from"`
+	To          string    `db:"to"`
+	Amount      float64   `db:"amount"`
+	Author      string    `db:"author"`
+	TxTime      time.Time `db:"tx_time"`
+}

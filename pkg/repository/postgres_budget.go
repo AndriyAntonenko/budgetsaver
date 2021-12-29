@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -34,4 +35,31 @@ func (r *BudgetPostgres) CreateBudget(payload CreateBudgetRecord) (*BudgetRecord
 	}
 
 	return &newRecord, nil
+}
+
+func (r *BudgetPostgres) GetUserBudget(budgetId string, userId string) (*BudgetRecord, error) {
+	var budgetRecord BudgetRecord
+	query := fmt.Sprintf(`
+		SELECT
+			b.id,
+			b.name,
+			b.creator,
+			b.finance_group_id,
+			b.description
+		FROM %s b
+		INNER JOIN %s fg ON fg.id = b.finance_group_id AND b.id = $1
+		INNER JOIN %s ufg ON ufg.group_id = fg.id AND ufg.user_id = $2;
+	`, budgetTable, financeGroupTable, usersFinanceGroupTable)
+
+	row := r.db.QueryRow(query, budgetId, userId)
+	err := row.Scan(&budgetRecord.Id, &budgetRecord.Name, &budgetRecord.Creator, &budgetRecord.FinanceGroupId, &budgetRecord.Description)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &budgetRecord, errors.New("budget with such id not found")
+		}
+		return &budgetRecord, err
+	}
+
+	return &budgetRecord, nil
 }
