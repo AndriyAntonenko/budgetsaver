@@ -2,7 +2,15 @@ FROM golang:1.16-alpine
 
 WORKDIR /app
 
-# TODO: Multistage build
+ENV MODE=development \
+    POSTGRES_HOST=localhost \
+    POSTGRES_PASSWORD=qwerty \
+    POSTGRES_DB=postgres \
+    POSTGRES_USER=postgres \
+    POSTGRES_PORT=5432 \
+    JWT_ACCESS_TOKEN_SECRET=secret \
+    JWT_REFRESH_TOKEN_SECRET=secret
+
 COPY ./go.sum ./go.mod ./*.go ./
 COPY ./pkg /app/pkg
 COPY ./cmd /app/cmd
@@ -18,4 +26,4 @@ RUN go mod download \
 
 EXPOSE 8080
 
-CMD [ "./bin/server" ]
+CMD [ "/app/bin/server" ]

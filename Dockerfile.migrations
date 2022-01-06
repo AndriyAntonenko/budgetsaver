@@ -1,0 +1,24 @@
+FROM golang:1.16-alpine
+
+ENV VERSION=v4.15.1 \
+    GO111MODULE=on
+
+RUN apk add --no-cache git
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@${VERSION}
+
+RUN apk add --no-cache bash
+
+ENV POSTGRES_HOST=localhost \
+    POSTGRES_PASSWORD=qwerty \
+    POSTGRES_DB=postgres \
+    POSTGRES_USER=postgres \
+    POSTGRES_PORT=5432
+
+WORKDIR /root
+COPY ./schemas /root/schemas 
+COPY ./scripts/migrations-init.sh /root/entrypoint.sh
+COPY ./scripts/wait-for-it.sh /root/wait-for-it.sh
+
+RUN chmod +x /root/entrypoint.sh /root/wait-for-it.sh
+
+ENTRYPOINT ["/root/entrypoint.sh"]
