@@ -42,6 +42,10 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	// Budget API
 	r.Post("/api/budget", h.createBudget)
 	r.Post("/api/budget/:budgetId/tx", h.createTx)
+
+	// Tx category
+	r.Post("/api/tx-category", h.createTxCategory)
+
 	return r
 }
 

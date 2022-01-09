@@ -33,11 +33,16 @@ type BudgetTx interface {
 	CreateBudgetTx(CreateBudgetTxRecord) (*BudgetTxRecord, error)
 }
 
+type TxCategory interface {
+	AddTxCategory(CreateTxCategoryRecord) (*TxCategoryRecord, error)
+}
+
 type Repository struct {
 	Authorization
 	FinanceGroup
 	Budget
 	BudgetTx
+	TxCategory
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -46,5 +51,6 @@ func NewRepository(db *sql.DB) *Repository {
 		FinanceGroup:  NewFinanceGroupPostgres(db),
 		Budget:        NewBudgetPostgres(db),
 		BudgetTx:      NewBudgetTXPostgres(db),
+		TxCategory:    NewTxCategoryPostgres(db),
 	}
 }

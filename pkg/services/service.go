@@ -32,20 +32,28 @@ type BudgetTx interface {
 	CreateBudgetTx(string, string, dto.CreateBudgetTxDto) (*dto.BudgetTxDto, *ServiceError)
 }
 
+type TxCategory interface {
+	// user id, payload
+	CreateTxCategory(string, *dto.CreateTxCategoryDto) (*dto.TxCategoryDto, *ServiceError)
+}
+
 type Service struct {
 	Authorization
 	FinanceGroup
 	Budget
 	BudgetTx
+	TxCategory
 }
 
 func NewService(repo *repository.Repository) *Service {
 	budgetService := NewBudgetService(repo.Budget, repo.FinanceGroup)
 
+	// TODO: Use pointers
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization),
 		FinanceGroup:  NewFinanceGroupService(repo.FinanceGroup),
 		Budget:        NewBudgetService(repo.Budget, repo.FinanceGroup),
 		BudgetTx:      NewTxService(repo.BudgetTx, budgetService),
+		TxCategory:    NewTxCategoryService(&repo.TxCategory, &repo.FinanceGroup),
 	}
 }

@@ -92,3 +92,20 @@ type CreateBudgetTxRecord struct {
 	Author      string    `db:"author"`
 	TxTime      time.Time `db:"tx_time"`
 }
+
+// TX CATEGORY
+
+type TxCategoryRecord struct {
+	Id           string         `db:"id"`
+	Name         string         `db:"name"`
+	Creator      sql.NullString `db:"creator"`
+	FinanceGroup sql.NullString `db:"finance_group"`
+	CreatedAt    time.Time      `db:"created_at"`
+	DeletedAt    sql.NullTime   `db:"deleted_at"`
+}
+
+type CreateTxCategoryRecord struct {
+	Name         string  `db:"name"`
+	Creator      *string `db:"creator"`
+	FinanceGroup *string `db:"finance_group"`
+}
