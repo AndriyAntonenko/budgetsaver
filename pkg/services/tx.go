@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"time"
 
 	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
@@ -8,24 +9,36 @@ import (
 )
 
 type TxService struct {
-	txRepo        repository.BudgetTx
-	budgetService Budget
+	txRepo         *repository.BudgetTx
+	txCategoryRepo *repository.TxCategory
+	budgetService  Budget
 }
 
-func NewTxService(tx repository.BudgetTx, budget Budget) *TxService {
+func NewTxService(tx *repository.BudgetTx, budget Budget, txCategoryRepo *repository.TxCategory) *TxService {
 	return &TxService{
-		txRepo:        tx,
-		budgetService: budget,
+		txRepo:         tx,
+		budgetService:  budget,
+		txCategoryRepo: txCategoryRepo,
 	}
 }
 
 func (s *TxService) CreateBudgetTx(userId string, budgetId string, payload dto.CreateBudgetTxDto) (*dto.BudgetTxDto, *ServiceError) {
-	_, err := s.budgetService.FetchUserBudget(userId, budgetId)
-	if err != nil {
-		return nil, err
+	_, serviceErr := s.budgetService.FetchUserBudget(userId, budgetId)
+	if serviceErr != nil {
+		return nil, serviceErr
 	}
 
-	newTx, repoErr := s.txRepo.CreateBudgetTx(repository.CreateBudgetTxRecord{
+	if payload.Category != nil {
+		_, repoErr := (*s.txCategoryRepo).GetTxCategoryById(*payload.Category)
+		if repoErr == sql.ErrNoRows {
+			return nil, NewServiceError(EntityNotFound, "category not found")
+		}
+		if repoErr != nil {
+			return nil, NewServiceError(UnexpectedError, repoErr.Error())
+		}
+	}
+
+	newTx, repoErr := (*s.txRepo).CreateBudgetTx(repository.CreateBudgetTxRecord{
 		BudgetId:    budgetId,
 		Title:       payload.Title,
 		Description: payload.Description,
@@ -33,6 +46,7 @@ func (s *TxService) CreateBudgetTx(userId string, budgetId string, payload dto.C
 		To:          payload.To,
 		Amount:      payload.Amount,
 		Author:      userId,
+		Category:    payload.Category,
 		TxTime:      time.Now(),
 	})
 
@@ -40,7 +54,7 @@ func (s *TxService) CreateBudgetTx(userId string, budgetId string, payload dto.C
 		return nil, NewServiceError(UnexpectedError, repoErr.Error())
 	}
 
-	return &dto.BudgetTxDto{
+	res := dto.BudgetTxDto{
 		Id:          newTx.Id,
 		BudgetId:    newTx.BudgetId,
 		Title:       newTx.Title,
@@ -50,5 +64,12 @@ func (s *TxService) CreateBudgetTx(userId string, budgetId string, payload dto.C
 		Amount:      newTx.Amount,
 		Author:      newTx.Author,
 		TxTime:      newTx.TxTime,
-	}, nil
+		Category:    &newTx.Category.String,
+	}
+
+	if newTx.Category.Valid {
+		res.Category = &newTx.Category.String
+	}
+
+	return &res, nil
 }

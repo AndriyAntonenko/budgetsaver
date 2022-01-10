@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -55,6 +56,26 @@ func (r *TxCategoryPostgres) AddTxCategory(payload CreateTxCategoryRecord) (*TxC
 
 	err = row.Close()
 	if err != nil {
+		return nil, err
+	}
+
+	return &txCategory, nil
+}
+
+func (r *TxCategoryPostgres) GetTxCategoryById(categoryId string) (*TxCategoryRecord, error) {
+	var txCategory TxCategoryRecord
+	getQuery := fmt.Sprintf("SELECT %s FROM %s WHERE id = $1", columnsString, budgetTxCategory)
+
+	row := r.db.QueryRow(getQuery, categoryId)
+	err := row.Scan(&txCategory.Id, &txCategory.Name, &txCategory.Creator, &txCategory.FinanceGroup, &txCategory.CreatedAt, &txCategory.DeletedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("budget with such id not found")
+		}
 		return nil, err
 	}
 

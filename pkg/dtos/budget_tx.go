@@ -8,6 +8,7 @@ type CreateBudgetTxDto struct {
 	From        string  `json:"from"`
 	To          string  `json:"to"`
 	Amount      float64 `json:"amount"`
+	Category    *string `json:"category"`
 }
 
 type BudgetTxDto struct {
@@ -19,5 +20,6 @@ type BudgetTxDto struct {
 	To          string    `json:"to"`
 	Amount      float64   `json:"amount"`
 	Author      string    `json:"author"`
+	Category    *string   `json:"category"`
 	TxTime      time.Time `json:"txTime"`
 }

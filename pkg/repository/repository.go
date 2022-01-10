@@ -35,6 +35,8 @@ type BudgetTx interface {
 
 type TxCategory interface {
 	AddTxCategory(CreateTxCategoryRecord) (*TxCategoryRecord, error)
+	// tx category id
+	GetTxCategoryById(string) (*TxCategoryRecord, error)
 }
 
 type Repository struct {

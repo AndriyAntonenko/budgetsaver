@@ -53,7 +53,7 @@ func NewService(repo *repository.Repository) *Service {
 		Authorization: NewAuthService(repo.Authorization),
 		FinanceGroup:  NewFinanceGroupService(repo.FinanceGroup),
 		Budget:        NewBudgetService(repo.Budget, repo.FinanceGroup),
-		BudgetTx:      NewTxService(repo.BudgetTx, budgetService),
+		BudgetTx:      NewTxService(&repo.BudgetTx, budgetService, &repo.TxCategory),
 		TxCategory:    NewTxCategoryService(&repo.TxCategory, &repo.FinanceGroup),
 	}
 }
