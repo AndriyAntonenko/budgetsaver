@@ -7,14 +7,16 @@ import (
 )
 
 type BudgetService struct {
-	budgetRepo       repository.Budget
-	financeGroupRepo repository.FinanceGroup
+	budgetRepo              repository.Budget
+	financeGroupRepo        repository.FinanceGroup
+	currencyExchangeService CurracyExchange
 }
 
-func NewBudgetService(budgetRepo repository.Budget, financeGroupRepo repository.FinanceGroup) *BudgetService {
+func NewBudgetService(budgetRepo repository.Budget, financeGroupRepo repository.FinanceGroup, currencyExchangeService CurracyExchange) *BudgetService {
 	return &BudgetService{
-		budgetRepo:       budgetRepo,
-		financeGroupRepo: financeGroupRepo,
+		budgetRepo:              budgetRepo,
+		financeGroupRepo:        financeGroupRepo,
+		currencyExchangeService: currencyExchangeService,
 	}
 }
 
@@ -33,11 +35,22 @@ func (s *BudgetService) CreateBudget(userId string, payload dto.CreateBudgetPayl
 		return nil, NewServiceError(ActionForbiddenError, "user should be administrator or owner of this group to create a budget")
 	}
 
+	availableSymbols, err := s.currencyExchangeService.GetSupportedSymbols()
+
+	if err != nil {
+		return nil, NewServiceError(UnexpectedError, "cannot verify currency")
+	}
+
+	if _, currencyExists := availableSymbols[payload.Currency]; !currencyExists {
+		return nil, NewServiceError(WrongPropertyValues, "such currency not exists")
+	}
+
 	newBudget, err := s.budgetRepo.CreateBudget(repository.CreateBudgetRecord{
 		Creator:        userId,
 		FinanceGroupId: payload.GroupId,
 		Name:           payload.Name,
 		Description:    payload.Description,
+		Currency:       payload.Currency,
 	})
 
 	if err != nil {
@@ -50,6 +63,7 @@ func (s *BudgetService) CreateBudget(userId string, payload dto.CreateBudgetPayl
 		Description: newBudget.Description,
 		Creator:     newBudget.Creator,
 		GroupId:     newBudget.FinanceGroupId,
+		Currency:    newBudget.Currency,
 	}, nil
 }
 
@@ -65,5 +79,6 @@ func (s *BudgetService) FetchUserBudget(userId string, budgetId string) (*dto.Bu
 		Description: budget.Description,
 		Creator:     budget.Creator,
 		GroupId:     budget.FinanceGroupId,
+		Currency:    budget.Currency,
 	}, nil
 }

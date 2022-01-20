@@ -56,6 +56,7 @@ type CreateBudgetRecord struct {
 	Name           string `db:"name"`
 	Description    string `db:"description"`
 	FinanceGroupId string `db:"finance_group_id"`
+	Currency       string `db:"currency"`
 }
 
 type BudgetRecord struct {
@@ -64,6 +65,7 @@ type BudgetRecord struct {
 	Name           string `db:"name"`
 	Description    string `db:"description"`
 	FinanceGroupId string `db:"finance_group_id"`
+	Currency       string `db:"currency"`
 }
 
 // BUDGET TX TABLE ANNOTATIONS

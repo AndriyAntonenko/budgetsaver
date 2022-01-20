@@ -52,15 +52,16 @@ type Service struct {
 }
 
 func NewService(repo *repository.Repository) *Service {
-	budgetService := NewBudgetService(repo.Budget, repo.FinanceGroup)
+	currencyExchangeService := NewCurracyExchangeService(config.UseAppConfig().ExchangeratesApi.ApiKey, config.UseAppConfig().ExchangeratesApi.Url)
+	budgetService := NewBudgetService(repo.Budget, repo.FinanceGroup, currencyExchangeService)
 
 	// TODO: Use pointers
 	return &Service{
 		Authorization:   NewAuthService(repo.Authorization),
 		FinanceGroup:    NewFinanceGroupService(repo.FinanceGroup),
-		Budget:          NewBudgetService(repo.Budget, repo.FinanceGroup),
+		Budget:          budgetService,
 		BudgetTx:        NewTxService(&repo.BudgetTx, budgetService, &repo.TxCategory),
 		TxCategory:      NewTxCategoryService(&repo.TxCategory, &repo.FinanceGroup),
-		CurracyExchange: NewCurracyExchangeService(config.UseAppConfig().ExchangeratesApi.ApiKey, config.UseAppConfig().ExchangeratesApi.Url),
+		CurracyExchange: currencyExchangeService,
 	}
 }

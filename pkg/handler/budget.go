@@ -34,6 +34,12 @@ func (h *Handler) createBudget(w http.ResponseWriter, r *http.Request, _ *goRout
 			return
 		}
 
+		if serviceErr.Id == service.WrongPropertyValues {
+			logger.UseBasicLogger().Error("Service error: ", errors.New(serviceErr.Error()), "func createBudget()")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
 		logger.UseBasicLogger().Error("Service error: ", errors.New(serviceErr.Error()), "func createBudget()")
 		w.WriteHeader(http.StatusInternalServerError)
 		return

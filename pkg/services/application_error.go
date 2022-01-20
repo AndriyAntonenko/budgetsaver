@@ -21,4 +21,5 @@ const (
 	UnknownFinanceGroupMemberError = "UNKNOWN_GROUP_MEMBER"
 	ActionForbiddenError           = "ACTION_FORBIDDEN"
 	EntityNotFound                 = "ENTITY_NOT_FOUND"
+	WrongPropertyValues            = "WRONG_PROPERTY_VALUE"
 )
