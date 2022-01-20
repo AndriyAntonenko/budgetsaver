@@ -46,6 +46,8 @@ func (h *Handler) InitRoutes() *goRouter.Router {
 	// Tx category
 	r.Post("/api/tx-category", h.createTxCategory)
 
+	// currency
+	r.Get("/api/currency/available", h.getAvailableCurrencies)
 	return r
 }
 

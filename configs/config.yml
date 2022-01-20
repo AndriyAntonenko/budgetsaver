@@ -3,3 +3,6 @@ logFile: "server.log"
 
 db:
   sslMode: "disable"
+
+externalServices:
+  currencyExchange: http://api.exchangeratesapi.io/v1

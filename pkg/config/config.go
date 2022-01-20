@@ -27,12 +27,18 @@ type JwtConfig struct {
 	RefreshTokenSecret string
 }
 
+type ExchangeratesApiConfig struct {
+	ApiKey string
+	Url    string
+}
+
 type AppConfig struct {
-	Port     string
-	LogFile  string
-	Mode     string
-	Postgres PostgresConfig
-	Jwt      JwtConfig
+	Port             string
+	LogFile          string
+	Mode             string
+	Postgres         PostgresConfig
+	ExchangeratesApi ExchangeratesApiConfig
+	Jwt              JwtConfig
 }
 
 func InitAppConfig() (*AppConfig, error) {
@@ -61,6 +67,10 @@ func InitAppConfig() (*AppConfig, error) {
 			Jwt: JwtConfig{
 				AccessTokenSecret:  os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
 				RefreshTokenSecret: os.Getenv("JWT_REFRESH_TOKEN_SECRET"),
+			},
+			ExchangeratesApi: ExchangeratesApiConfig{
+				ApiKey: os.Getenv("EXCHANGE_SERVICE_API_KEY"),
+				Url:    viper.GetString("externalServices.currencyExchange"),
 			},
 		}
 

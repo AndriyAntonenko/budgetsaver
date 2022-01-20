@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/AndriyAntonenko/budgetSaver/pkg/config"
 	dto "github.com/AndriyAntonenko/budgetSaver/pkg/dtos"
 	"github.com/AndriyAntonenko/budgetSaver/pkg/repository"
 )
@@ -37,12 +38,17 @@ type TxCategory interface {
 	CreateTxCategory(string, *dto.CreateTxCategoryDto) (*dto.TxCategoryDto, *ServiceError)
 }
 
+type CurracyExchange interface {
+	GetSupportedSymbols() (map[string]string, error)
+}
+
 type Service struct {
 	Authorization
 	FinanceGroup
 	Budget
 	BudgetTx
 	TxCategory
+	CurracyExchange
 }
 
 func NewService(repo *repository.Repository) *Service {
@@ -50,10 +56,11 @@ func NewService(repo *repository.Repository) *Service {
 
 	// TODO: Use pointers
 	return &Service{
-		Authorization: NewAuthService(repo.Authorization),
-		FinanceGroup:  NewFinanceGroupService(repo.FinanceGroup),
-		Budget:        NewBudgetService(repo.Budget, repo.FinanceGroup),
-		BudgetTx:      NewTxService(&repo.BudgetTx, budgetService, &repo.TxCategory),
-		TxCategory:    NewTxCategoryService(&repo.TxCategory, &repo.FinanceGroup),
+		Authorization:   NewAuthService(repo.Authorization),
+		FinanceGroup:    NewFinanceGroupService(repo.FinanceGroup),
+		Budget:          NewBudgetService(repo.Budget, repo.FinanceGroup),
+		BudgetTx:        NewTxService(&repo.BudgetTx, budgetService, &repo.TxCategory),
+		TxCategory:      NewTxCategoryService(&repo.TxCategory, &repo.FinanceGroup),
+		CurracyExchange: NewCurracyExchangeService(config.UseAppConfig().ExchangeratesApi.ApiKey, config.UseAppConfig().ExchangeratesApi.Url),
 	}
 }
